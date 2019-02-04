@@ -44,22 +44,24 @@ app.get('/topstories', (req, res, next) => {
       const topStories = JSON.parse(body);
       const limit = 10;
 
-      res.json(
+      Promise.all(
         topStories.slice(0, limit).map(story => (
-          request(
-            { url: `https://hacker-news.firebaseio.com/v0/item/${story}.json` },
-            (error, response, body) => {
-              if (error || response.statusCode !== 200) {
-                return next(new Error('Error requesting story item'));
+          new Promise((resolve, reject) => {
+            request(
+              { url: `https://hacker-news.firebaseio.com/v0/item/${story}.json` },
+              (error, response, body) => {
+                if (error || response.statusCode !== 200) {
+                  return reject(new Error('Error requesting story item'));
+                }
+
+                resolve(JSON.parse(body));
               }
-
-              console.log('JSON.parse(body)', JSON.parse(body));
-
-              return JSON.parse(body);
-            }
-          )
+            )
+          })
         ))
-      );
+      )
+      .then(stories => res.json(stories))
+      .catch(error => next(error));
     }
   )
 });
