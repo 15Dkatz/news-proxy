@@ -1,6 +1,5 @@
 const express = require('express');
 const request = require('request');
-const path = require('path');
 const LimitingMiddleware = require('./limiting-middleware');
 const stories = require('./stories');
 
